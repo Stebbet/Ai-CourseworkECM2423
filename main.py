@@ -1,102 +1,97 @@
 """
-author: Sam Tebbet
-file: main.py
-desctiption: depth first search on maxe-___.txt files to find exit
-"""
-import collections
-
-"""
-0 1 2
-3 4 6 
-6 7 8
+Scan the file
+Find the path nodes on that file and add them to an 2D array like [[ Node(x, y) ]]
+Find the start node
+Find the finish node
 """
 
+class Node:
+    def __init__(self, x, y):
+        visited = False
+        self.x = x
+        self.y = y
+        self.visited = False
+        path = True
 
-def find_neighbours(x, y):
-    return [[x - 1, y - 1], [x, y - 1], [x + 1, y - 1],
-            [x - 1, y], [], [x + 1, y],
-            [x - 1, y + 1], [x, y + 1], [x + 1, y + 1]]
+    def find_neighbours(self):
+        neighbours = []
+        neighbours.append((self.x - 1, self.y))  # West
+        neighbours.append((self.x, self.y + 1))  # South
+        neighbours.append((self.x + 1, self.y))  # East
+        if self.y - 1 >= 0:
+            neighbours.append((self.x, self.y - 1))  # North
+
+        return neighbours
+
+    def get_position(self):
+        return self.x, self.y
 
 
-def load(file: str) -> (int, int, [[str]]):
-    """
-    Loads a file and returns the number of columns and rows
-        :param file: the path of the file to be loaded
-        :return (int, int, [str]): The number of rows, number of columns and the maze as a string
-    """
+def get_paths(filename: str) -> {}:
+    path_dict = {}
 
-    row_count = 0
-    col_count = 0
+    with open(filename, 'r') as f:
+        total_maze = f.readlines()
 
-    # Open and read the file
-    with open(file, 'r') as f:
-        lines = f.readlines()
+    total_maze_cleaned = []
+    for line in total_maze:
+        total_maze_cleaned.append(''.join(line.strip().split(' ')))
 
-    # Calculate the number of rows in the maze
-    # Make the new string to return
-    new_lines = []
-    for line in lines:
-        if '#' not in line or '-' not in line:
+    for line_index in range(len(total_maze_cleaned)):
+        for character_index in range(len(total_maze_cleaned[line_index])):
+            if total_maze_cleaned[line_index][character_index] == '-':
+                new_node = Node(character_index, line_index)
+                new_node_neighbours = new_node.find_neighbours()
+                path_dict.update({
+                    new_node.get_position(): new_node_neighbours
+                })
+
+    # Clean the path dictionary by removing invalid values
+    # Go into each key.
+    # Check if each value is part of the dictionary in the y++ and y-- rows
+
+    updated_path_dict = {}
+    keys = path_dict.keys()
+    items = path_dict.items()
+
+    for item in items:
+        neighbours = list(item[1])
+        for neighbour in item[1]:
+            if neighbour not in keys:
+                neighbours.remove(neighbour)
+        updated_path_dict.update({
+            item[0]: neighbours
+        })
+
+    return updated_path_dict, list(keys)[-1], list(keys)[0]
+
+
+
+
+def depth_first_search(filename):
+    def dfs(graph, node):
+        if node is winner:
+            visited.append(node)
+            return
+        else:
+            if node not in visited:
+                visited.append(node)
+                for neighbour in graph[node]:
+                    dfs(graph, neighbour)
+
+    nodes, winner, start = get_paths(filename)
+    visited = []
+    dfs(nodes, start)
+    traverse_path = []
+    for i in visited:
+        if i == winner:
+            traverse_path.append(i)
             break
-        new_Line = ""
-        for character in line:
-            if character == "#" or character == "-":
-                new_Line += character
+        traverse_path.append(i)
 
-        new_lines += new_Line
-        row_count += 1
-
-    # Calculate the number of columns in the maze
-
-    col_count = len(new_lines[0])
-    fin = 0
-    for i in range(row_count):
-        if lines[col_count - 1][i] == '-':
-            fin = i
-    f.close()
-
-    return row_count, col_count, new_lines, fin
-
-def get_graph(nodes, x_count, y_count):
-    graph = {}
-    for y in y_count:
-        for x in x_count:
-            graph[[nodes[y][x].x, nodes[y][x].y]] = nodes[y][x].find_neighbours()
-    return graph
+    return traverse_path, visited
 
 
-def get_path(x_count, y_count, maze_str: str) -> [[int]]:
-    """
-    Returns the path of valid nodes line in [[x, y]]
-    :param x_count: number of columns
-    :param y_count: number of rows
-    :param maze_str: the maze as a string
-    :return: array of path nodes in the maze
-    """
-    path = []
-    for y in y_count:
-        for x in x_count:
-            if maze_str[y][x] == '-':
-                path.append([x, y])
-    return path
+trav, vis = depth_first_search('maze-Easy.txt')
+print(f"{len(trav)} : {len(vis)}")
 
-
-# Need to know if it is valid or not to then add to the list of nodes
-def dfs(visited, graph, node, winner):
-    if node == winner:
-        return visited
-    if node not in visited:
-        visited.add(node)
-        for neighbour in graph[node]:
-            if neighbour[1]:
-                dfs(visited, graph, neighbour[0], winner)
-
-
-if __name__ == "__main__":
-    maze = "maze-Easy.txt"
-    rows, cols, maze_string, finish = load(maze)
-    nodes = get_path(cols - 1, rows - 1, maze_string)
-    visited = set()  # Keep track of visited nodes
-    nodes_graph = get_graph(nodes)
-
-    visited = dfs(visited, nodes_graph, [0, 1], [cols - 1][finish])
