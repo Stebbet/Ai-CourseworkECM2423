@@ -1,8 +1,6 @@
 """
-Scan the file
-Find the path nodes on that file and add them to an 2D array like [[ Node(x, y) ]]
-Find the start node
-Find the finish node
+author: Sam Tebbet
+description: Coursework for ECM2423 Artificial Intelligence
 """
 
 class Node:
@@ -73,11 +71,10 @@ def depth_first_search(filename):
         if node is winner:
             visited.append(node)
             return
-        else:
-            if node not in visited:
-                visited.append(node)
-                for neighbour in graph[node]:
-                    dfs(graph, neighbour)
+        if node not in visited:
+            visited.append(node)
+            for neighbour in graph[node]:
+                dfs(graph, neighbour)
 
     nodes, winner, start = get_paths(filename)
     visited = []
