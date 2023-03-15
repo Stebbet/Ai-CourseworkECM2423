@@ -22,7 +22,7 @@ def get_manhattan(current_node: (int, int), end_node: (int, int)) -> int:
     return dx + dy
 
 
-def get_euclidian(current_node: (int, int), end_node: (int, int)) -> int:
+def get_euclidian(current_node: (int, int), end_node: (int, int)) -> float:
     """
     The function finds the euclidian distance between two node coordinates
     :param current_node: The current node
