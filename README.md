@@ -12,7 +12,7 @@ walls = '#'
 
 paths = '-'
 
-start = '-' on the fist line
+start = '-' on the first line
 
 end = '-' on the last line
 
